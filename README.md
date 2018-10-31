@@ -1,6 +1,8 @@
 # MacOS_VBA_Macro
 Example VBA Macro for MacOS Mojave 10.14
 
+DISCLAIMER: This software may contain bugs, both apparent and less apparent ones. We do not accept responsibility for any problems that arise from use of this software. Use entirely at your own risk.
+
 # Summary
 The template excel document contains a macro targeting MacOS.
 The macro expects a base64 encoded payload to exist at xl/embeddings/Microsoft_Word_Document2.docx.
