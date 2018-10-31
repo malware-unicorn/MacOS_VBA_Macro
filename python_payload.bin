@@ -1,0 +1,1 @@
+import urllib2;contents = urllib2.urlopen('http://malwareunicorn.org').read();print contents
