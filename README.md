@@ -1,2 +1,2 @@
 # MacOS_VBA_Macro
-Example VBA Macro for MacOS Mojave
+Example VBA Macro for MacOS Mojave 10.14
